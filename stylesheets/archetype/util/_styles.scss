@@ -37,6 +37,9 @@
     @if has-custom-output-styler($property, $value, pre) == true {
       @include custom-output-styler($property, $value, $method: pre);
     }
+    // By default, "content" values are always quoted.
+    // This alias allows you to add a "content" property based on an element's attribute
+    @else if($property == attr)                 { content: attr($value); }
     // border-radius
     @else if($property == border-radius)        { @include border-radius($value...); }
     // box-sizing
