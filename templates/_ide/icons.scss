@@ -1,0 +1,8 @@
+$CONFIG_DISABLE_STYLEGUIDE_SPRITES: true;
+@import "archetype";
+@import "archetype/theme";
+$icon-mappings: map-get(get-glyph-library(default), mappings);
+
+@each $icon,$value in $icon-mappings{
+/*#{$icon}*/
+}

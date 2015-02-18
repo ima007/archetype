@@ -1,0 +1,24 @@
+$CONFIG_DISABLE_STYLEGUIDE_SPRITES: true;
+@import "archetype";
+@import "archetype/theme";
+
+$known: styleguide-components();
+
+@each $component in $known{
+  @each $variant in styleguide_component_variants($component){
+    $index: str-index($variant, "in ");
+    $ondex: str-index($variant, "on ");
+    @if $variant == "default"{
+/*#{$component}*/
+    }@else if str-index($variant, in) == 1 or str-index($variant, with) == 1{
+/*#{$component $variant}*/
+    }@else if $index != null and $index > 1{
+/*#{str-slice($variant,0,$index - 2) $component str-slice($variant,$index)}*/
+    }@else if $ondex != null and $ondex > 1{
+/*#{str-slice($variant,0,$ondex - 2) $component str-slice($variant,$ondex)}*/
+    }@else{
+/*#{$variant $component}*/
+    }
+
+  }
+}
