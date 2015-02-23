@@ -10,7 +10,7 @@ require "compass-import-once"
 
 if @description.nil?
   options = {
-    :theme => '',
+    :theme => 'archetype',
     :output => ''
   }
   OptionParser.new do |opts|
@@ -18,10 +18,10 @@ if @description.nil?
     opts.define_head "Usage: #{Archetype.name} ide [theme] [output]"
     opts.separator ""
     opts.separator "Example usage:"
-    opts.separator " #{Archetype.name} ide --theme=archetype --output=/path/to/output/directory"
-    opts.separator " #{Archetype.name} ide --theme=/path/to/theme/ --output=/path/to/output/directory"
+    opts.separator " #{Archetype.name} ide --output=/path/to/output/directory"
+    opts.separator " #{Archetype.name} ide --theme=/path/to/theme/core.scss --output=/path/to/output/directory"
 
-    opts.on('-t', '--theme THEME', 'theme path') do |v|
+    opts.on('-t', '--theme THEME', 'path to theme core.scss file') do |v|
       options[:theme] = v
     end
 
@@ -51,9 +51,8 @@ if @description.nil?
     FileUtils.mkdir_p(tmp)
     FileUtils.cp_r(Dir["#{theme_template}/**"], tmp)
 
-    puts "Creating sublime autocompletions for archetype to #{File.expand_path(output)}..."
+    puts "Creating sublime autocompletions for #{theme_path} to #{File.expand_path(output)}..."
 
-    if theme_path == 'archetype' || theme_path == 'default'
     theme_name = 'archetype'
     # compile and grab all component & variants, icons from theme
     Dir.glob("#{tmp}/**/*.scss") do |filename|
@@ -62,12 +61,23 @@ if @description.nil?
       contents = []
       css_name = filename + '.css'
       css_output = css_name
+
+      #if it isn't 'archetype', then it's a user-defined theme
+      if theme_path != 'archetype' && theme_path != 'default'
+        scss_out = File.read(filename).gsub(/\/\/Replace/,'@import "' + theme_path + '";')
+        File.open(filename, "w") { |file| file.puts scss_out }
+      end
+      #Compile the SCSS to get the names
       Compass.compiler.compile(filename, css_output)
+
+      #Strip out all the comment deliminters
       out = File.read(css_output).gsub(/\/\*/,'').gsub(/\*\//,'')
       File.open(css_output, "w") { |file| file.puts out }
+
+      #Grab each line, which has a component name
       contents = IO.readlines css_output
 
-      #create each sublime snippet line
+      #Create each sublime snippet line
       formatted_contents = []
       contents.each { |component|
         formatted_contents.push "{\"trigger\": \"#{component} \\t #{namespaced_name}\", \"contents\": \"#{component}\" }"
@@ -85,9 +95,6 @@ if @description.nil?
     puts "Run this periodically to get the latest components."
     exit
   end
-else
-    @description = "Sorry, only the default archetype theme is supported right now."
-end
 else
   @description = description
 end
