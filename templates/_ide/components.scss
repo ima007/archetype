@@ -7,19 +7,30 @@ $known: styleguide-components();
 
 @each $component in $known{
   @each $variant in styleguide_component_variants($component){
-    $index: str-index($variant, "in ");
-    $ondex: str-index($variant, "on ");
     @if $variant == "default"{
 /*#{$component}*/
-    }@else if str-index($variant, in) == 1 or str-index($variant, with) == 1{
-/*#{$component $variant}*/
-    }@else if $index != null and $index > 1{
-/*#{str-slice($variant,0,$index - 2) $component str-slice($variant,$index)}*/
-    }@else if $ondex != null and $ondex > 1{
-/*#{str-slice($variant,0,$ondex - 2) $component str-slice($variant,$ondex)}*/
     }@else{
-/*#{$variant $component}*/
-    }
+      //$index-length: 0;
+      $index: 10000;
+      $types: ("with", "in a", "in-", "in ", "without", "on-", "on a");
 
+      @each $type in $types{
+        $new-index: str-index($variant, $type);
+        @if str-index($variant, $type) != null and $new-index < $index{
+          $index: $new-index;
+          //$index-length: length($type);
+        }
+      }
+      @if str-index($variant,'-') != 1{
+
+        $modifiers: if($index < 10000, str-slice($variant, 0, $index - 1), $variant + ' ');
+        $contexts: if($index < 10000, str-slice($variant, $index), '');
+        @if $index >= 10000 {
+/*#{$modifiers}#{$component}*/
+        }@else{
+/*#{$modifiers}#{$component $contexts}*/
+        }
+      }
+    }
   }
 }
