@@ -1,11 +1,16 @@
 description = "Generate IDE code snippets for an archetype theme"
 
-require "sass"
+require 'sass'
 require 'sass/plugin'
-require "compass"
+require 'compass'
+gem 'mirror-mirror', '=1.0.0.rc.0'
+require 'mirror-mirror/activate'
 require "archetype"
-require "archetype-theme"
-require "compass-import-once"
+require 'archetype-theme'
+require 'archetype-grid'
+require 'archetype-base'
+require 'archetype-base-hybrid'
+require 'compass/import-once/activate'
 
 
 if @description.nil?
@@ -53,6 +58,16 @@ if @description.nil?
     content_for_file = "@import \"" + File.expand_path(theme_path) + "\";\n/*\#{$CONFIG_THEME}*/"
 
     File.open(theme_name_file, "w") { |file| file.puts content_for_file  }
+
+    Compass.add_configuration(
+      {
+        :project_path => '/Users/safsar/workspace/katy',
+        :sass_path => '/Users/safsar/workspace/katy',
+        :http_path => "/",
+        :images_path => '/Users/safsar/workspace/katy/images'
+      },
+      'custom1' # A name for the configuration, can be anything you want
+    )
     Compass.compiler.compile(theme_name_file, theme_name_css_file)
 
     #Strip out all the comment deliminters
@@ -82,6 +97,16 @@ if @description.nil?
       scss_out = File.read(filename).gsub(/\/\/Replace/,'@import "' + File.expand_path(theme_path) + '";')
       File.open(filename, "w") { |file| file.puts scss_out }
     end
+
+    Compass.add_configuration(
+      {
+        :project_path => '/Users/safsar/workspace/katy',
+        :sass_path => '/Users/safsar/workspace/katy',
+        :http_path => "/",
+        :images_path => '/Users/safsar/workspace/katy/images'
+      },
+      'custom' # A name for the configuration, can be anything you want
+    )
     #Compile the SCSS to get the names
     Compass.compiler.compile(filename, css_output)
 
@@ -100,8 +125,13 @@ if @description.nil?
 
     all_content = ["{\"source\": \"source.scss, meta.property-value.scss\",\"completions\":[",formatted_contents.join(","),"]}"]
 
-    # create completions file _<theme>.scss ...
-    File.open(output_dir + "/#{namespaced_name}.sublime-completions", "w") { |file| file.puts all_content.join }
+    complete_path = output_dir + "/#{namespaced_name}.sublime-completions"
+    # create completions file  ...
+    dirname = File.dirname(complete_path)
+    unless File.directory?(dirname)
+      FileUtils.mkdir_p(dirname)
+    end
+    File.open(complete_path, "w") { |file| file.puts all_content.join }
   end
 
   if not options[:output].nil?

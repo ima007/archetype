@@ -5,6 +5,11 @@ $CONFIG_DISABLE_STYLEGUIDE_SPRITES: true;
 
 $icon-mappings: map-get(get-glyph-library(default), mappings);
 
+//Old archetype support
+@if $CONFIG_GLYPHS_MAPPINGS != null {
+  $icon-mappings: $CONFIG_GLYPHS_MAPPINGS;
+}
+
 @each $icon,$value in $icon-mappings{
 /*#{$icon}*/
 }
